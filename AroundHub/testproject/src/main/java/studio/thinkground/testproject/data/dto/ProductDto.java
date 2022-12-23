@@ -1,11 +1,9 @@
 package studio.thinkground.testproject.data.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import studio.thinkground.testproject.data.entity.ProductEntity;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
