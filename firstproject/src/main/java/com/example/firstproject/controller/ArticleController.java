@@ -7,9 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -78,5 +80,41 @@ public class ArticleController {
 
         // 뷰 페이지 설정
         return "articles/edit";
+    }
+
+    @PostMapping("/articles/update")
+    public String update(ArticleForm form) {
+        log.info(form.toString());
+        // 1. DTO -> Entity 변환
+        Article articleEntity = form.toEntity();
+        log.info(articleEntity.toString());
+
+        // 2. Entity -> DB 저장
+        //  2-1. DB에서 기존 데이터 가져오기
+        Article target = articleRepository.findById(articleEntity.getId()).orElse(null);
+
+        //  2-2. 기존 데이터의 값을 갱신
+        if (target != null) {
+            articleRepository.save(articleEntity); // 엔티티가 db로 갱신됨
+        } 
+
+        // 3. 수정 결과 페이지로 리다이렉트
+        return "redirect:/articles/" + articleEntity.getId();
+    }
+
+    @GetMapping("/articles/{id}/delete") // html에서 delete 매핑을 공식적으론 지원하지 않아 편의상 get으로 변경
+    public String delete(@PathVariable Long id, RedirectAttributes attr) {
+        // 1. 삭제 대상 가져오기
+        Article target = articleRepository.findById(id).orElse(null);
+        log.info(target.toString()+"_deleted");
+
+        // 2. 대상을 삭제
+        if (target != null) {
+            articleRepository.delete(target); // db에서 target 삭제
+            attr.addFlashAttribute("msg", "Delete completed");
+        }
+        
+        // 3. 결과 페이지로 리다이렉트
+        return "redirect:/articles";
     }
 }
